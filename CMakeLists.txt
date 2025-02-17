@@ -35,18 +35,20 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(ADC-Conversor ADC-Conversor.c )
+add_executable(ADC-Conversor ADC-Conversor.c inc/ssd1306.c
+)
 
 pico_set_program_name(ADC-Conversor "ADC-Conversor")
 pico_set_program_version(ADC-Conversor "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(ADC-Conversor 0)
-pico_enable_stdio_usb(ADC-Conversor 0)
+pico_enable_stdio_usb(ADC-Conversor 1)
 
 # Add the standard library to the build
 target_link_libraries(ADC-Conversor
-        pico_stdlib)
+        pico_stdlib
+        )
 
 # Add the standard include files to the build
 target_include_directories(ADC-Conversor PRIVATE
@@ -54,9 +56,10 @@ target_include_directories(ADC-Conversor PRIVATE
 )
 
 # Add any user requested libraries
-target_link_libraries(ADC-Conversor 
+target_link_libraries(ADC-Conversor
         hardware_i2c
-        
+        hardware_pwm
+        hardware_adc
         )
 
 pico_add_extra_outputs(ADC-Conversor)
