@@ -42,7 +42,7 @@ pico_set_program_name(ADC-Conversor "ADC-Conversor")
 pico_set_program_version(ADC-Conversor "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(ADC-Conversor 0)
+pico_enable_stdio_uart(ADC-Conversor 1)
 pico_enable_stdio_usb(ADC-Conversor 1)
 
 # Add the standard library to the build
