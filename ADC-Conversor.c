@@ -192,6 +192,7 @@ void init_hardware(void) {
     init_pwm();
     init_display();
     init_ssd1306();
+    sleep_ms(500);
 }
 
 void init_adc(void) {
@@ -200,6 +201,7 @@ void init_adc(void) {
     adc_gpio_init(JOYSTICK_X);
     adc_gpio_init(JOYSTICK_Y);
     printf("ADC inicializado\n");
+    sleep_ms(500);
 }
 
 void init_leds(void) {
@@ -207,6 +209,7 @@ void init_leds(void) {
     gpio_init(LED_GREEN);
     gpio_set_dir(LED_GREEN, GPIO_OUT);
     printf("LED Verde inicializado\n");
+    sleep_ms(500);
 }
 
 void init_buttons(void) {
@@ -218,6 +221,7 @@ void init_buttons(void) {
     gpio_pull_up(BUTTON_JS);
     gpio_pull_up(BUTTON_A);
     printf("Botões inicializados\n");
+    sleep_ms(500);
 }
 
 void init_pwm(void) {
@@ -234,6 +238,7 @@ void init_pwm(void) {
     pwm_init(led_slice_blue, &config, true);
     pwm_init(led_slice_red, &config, true);
     printf("PWM inicializado\n");
+    sleep_ms(500);
 }
 
 void init_display(void) {
@@ -244,6 +249,7 @@ void init_display(void) {
     gpio_pull_up(I2C_SDA);
     gpio_pull_up(I2C_SCL);
     printf("I2C inicializado\n");
+    sleep_ms(500);
 }
 
 void init_ssd1306(void) {
@@ -254,4 +260,5 @@ void init_ssd1306(void) {
 
     ssd1306_fill(&ssd, false);
     ssd1306_send_data(&ssd);
+    sleep_ms(500);
 }
