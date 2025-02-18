@@ -1,12 +1,62 @@
+/**
+ * @file ADC-Conversor.c
+ * @brief Código de exemplo para uso de ADC, PWM e I2C com display SSD1306 no Raspberry Pi Pico.
+ * 
+ * Este código inicializa e utiliza vários periféricos no Raspberry Pi Pico, incluindo ADC para leitura de valores do joystick,
+ * PWM para controle do brilho do LED e I2C para comunicação com um display SSD1306. Ele também lida com entradas de botões
+ * para alternar estados dos LEDs e funcionalidade PWM.
+ * 
+ * Funcionalidades principais:
+ * - Leitura de valores do joystick usando ADC.
+ * - Controle de brilho dos LEDs usando PWM.
+ * - Comunicação com display SSD1306 via I2C.
+ * - Manipulação de entradas de botões para alternar estados dos LEDs e PWM.
+ * 
+ * Definições:
+ * - I2C_PORT: Porta I2C utilizada (i2c1).
+ * - I2C_SCL: Pino do clock I2C (GPIO 15).
+ * - I2C_SDA: Pino de dados I2C (GPIO 14).
+ * - LED_RED, LED_BLUE, LED_GREEN: Pinos dos LEDs (GPIO 13, 12, 11).
+ * - PWM_FREQ: Frequência do PWM em Hz.
+ * - CLOCK_FREQ: Frequência do clock em Hz.
+ * - LED_WRAP: Número máximo de ciclos PWM para o LED.
+ * - BUTTON_JS, BUTTON_A: Pinos dos botões (GPIO 22, 5).
+ * - JOYSTICK_X, JOYSTICK_Y: Pinos do joystick (GPIO 26, 27).
+ * - SQUARE_SIZE: Tamanho do quadrado no display.
+ * 
+ * Funções principais:
+ * - init_hardware: Inicializa todos os periféricos.
+ * - init_adc: Inicializa o ADC.
+ * - init_leds: Inicializa os LEDs.
+ * - init_buttons: Inicializa os botões.
+ * - init_pwm: Inicializa o PWM.
+ * - init_display: Inicializa o I2C.
+ * - init_ssd1306: Inicializa o display SSD1306.
+ * - read_joystick: Lê os valores do joystick.
+ * - button_handler: Manipula as interrupções dos botões.
+ * - display_border: Desenha a borda no display.
+ * - update_square: Atualiza a posição do quadrado no display.
+ * - update_leds_pwm: Atualiza a intensidade dos LEDs via PWM.
+ * - map_value: Mapeia valores do ADC para a posição do quadrado.
+ * 
+ * Variáveis globais:
+ * - led_state_green: Estado do LED verde.
+ * - led_slice_blue, led_slice_red: Número dos slices dos LEDs azul e vermelho.
+ * - wrap: Número máximo de ciclos do PWM.
+ * - pwm_enabled: Estado do PWM dos LEDs.
+ * - ssd: Estrutura do display SSD1306.
+ * - count_type: Tipo de borda do display.
+ * - adc_value_x, adc_value_y: Valores do ADC do joystick.
+ * 
+ * @autor Italo
+ * @data 2025-02-18
+ */
+
 #include <stdio.h>
 #include "pico/stdlib.h"
-
-// Pico SDK
 #include "hardware/i2c.h"
 #include "hardware/adc.h"
 #include "hardware/pwm.h"
-
-// Display SSD1306
 #include "inc/ssd1306.h"
 
 // I2C defines
@@ -20,9 +70,9 @@
 #define LED_GREEN 11
 
 // PWM defines
-#define PWM_FREQ 50 // Frequência do PWM em Hz
-#define CLOCK_FREQ 125000000 // Frequência do clock em Hz
-#define LED_WRAP 255 // Número máximo de ciclos do PWM para o LED
+#define PWM_FREQ 50 // PWM frequency in Hz
+#define CLOCK_FREQ 125000000 // Clock frequency in Hz
+#define LED_WRAP 255 // Maximum PWM cycles for the LED
 
 // Buttons defines
 #define BUTTON_JS 22
@@ -33,8 +83,7 @@
 #define JOYSTICK_Y 27
 #define SQUARE_SIZE 8
 
-// Protótipos
-// Inicializações
+// Function prototypes
 void init_hardware(void);
 void init_adc(void);
 void init_leds(void);
@@ -80,7 +129,7 @@ int main()
         update_square();
         update_leds_pwm();
         printf("X: %d, Y: %d\n", adc_value_x, adc_value_y);
-        sleep_ms(100);
+        sleep_ms(20);
     }
 }
 
@@ -90,15 +139,15 @@ void update_leds_pwm() {
     uint brightness_red = 0;
 
     // Mapeia os valores do joystick para o brilho PWM (0 a LED_WRAP)
-    if (adc_value_y < 2048) {
+    if (adc_value_y < 2047) {
         brightness_blue = map_value(adc_value_y, 0, 2048, LED_WRAP, 0);  // LED Azul (inverte eixo)
-    } else if (adc_value_y > 2048) {
+    } else if (adc_value_y > 2049) {
         brightness_blue = map_value(adc_value_y, 2048, 4095, 0, LED_WRAP);
     }
 
-    if (adc_value_x < 2048) {
+    if (adc_value_x < 2047) {
         brightness_red = map_value(adc_value_x, 0, 2048, LED_WRAP, 0);   // LED Vermelho (inverte eixo)
-    } else if (adc_value_x > 2048) {
+    } else if (adc_value_x > 2049) {
         brightness_red = map_value(adc_value_x, 2048, 4095, 0, LED_WRAP);
     }
 
@@ -192,7 +241,7 @@ void init_hardware(void) {
     init_pwm();
     init_display();
     init_ssd1306();
-    sleep_ms(500);
+    sleep_ms(50);
 }
 
 void init_adc(void) {
@@ -201,7 +250,7 @@ void init_adc(void) {
     adc_gpio_init(JOYSTICK_X);
     adc_gpio_init(JOYSTICK_Y);
     printf("ADC inicializado\n");
-    sleep_ms(500);
+    sleep_ms(50);
 }
 
 void init_leds(void) {
@@ -209,7 +258,7 @@ void init_leds(void) {
     gpio_init(LED_GREEN);
     gpio_set_dir(LED_GREEN, GPIO_OUT);
     printf("LED Verde inicializado\n");
-    sleep_ms(500);
+    sleep_ms(50);
 }
 
 void init_buttons(void) {
@@ -221,7 +270,7 @@ void init_buttons(void) {
     gpio_pull_up(BUTTON_JS);
     gpio_pull_up(BUTTON_A);
     printf("Botões inicializados\n");
-    sleep_ms(500);
+    sleep_ms(50);
 }
 
 void init_pwm(void) {
@@ -238,7 +287,7 @@ void init_pwm(void) {
     pwm_init(led_slice_blue, &config, true);
     pwm_init(led_slice_red, &config, true);
     printf("PWM inicializado\n");
-    sleep_ms(500);
+    sleep_ms(50);
 }
 
 void init_display(void) {
@@ -249,7 +298,7 @@ void init_display(void) {
     gpio_pull_up(I2C_SDA);
     gpio_pull_up(I2C_SCL);
     printf("I2C inicializado\n");
-    sleep_ms(500);
+    sleep_ms(50);
 }
 
 void init_ssd1306(void) {
@@ -260,5 +309,5 @@ void init_ssd1306(void) {
 
     ssd1306_fill(&ssd, false);
     ssd1306_send_data(&ssd);
-    sleep_ms(500);
+    sleep_ms(50);
 }
